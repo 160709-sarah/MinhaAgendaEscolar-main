@@ -20,10 +20,36 @@ form.addEventListener("submit", function (event) {
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker
     .register("./sw.js")
-    .then((registro) => {
-      console.log("Service Worker registrado com sucesso:", registro);
+    .then(() => console.log("Service Worker registrado"))
+    .catch(erro => console.error("Erro no SW:", erro);
+    )
+}
+
+function atualizarStatus() {
+  status.textContent = "Online";
+  status.className = "online";
+} else {
+  status.textContent ="Offline";
+  status.className = "offline";
+}
+
+window.addEventListener("online", atualizarStatus);
+window.addEventListener("offline", atualizarStatus);
+atualizarStatus();
+
+function carregarCompromissos() {
+  const main =  document.querySelector("#conteudo");
+
+  fetch("./dados.json")
+    .then(resposta => resposta.json())
+    .then(lista => {
+      main.innerHTML = lista
+      .map(c => `<p>${c.hora} - ${c.titulo}<p>`)
+      .join("";)
     })
-    .catch((erro) => {
-      console.error("Erro ao registrar Service Worker:", erro);
+    .catch(() => {
+      main.innerHTML = "<p>Sem conexão. Tente mais tarde.<p>";
     });
 }
+
+carregarCompromissos();

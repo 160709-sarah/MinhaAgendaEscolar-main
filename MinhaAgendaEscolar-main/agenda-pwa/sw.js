@@ -1,9 +1,14 @@
 const CACHE_NAME = "agenda-v1";
 
 const ARQUIVOS = [
-    "app.js",
+    "./",
+    "./app.js",
     "index.html",
-    "style.css"
+    "style.css",
+    "offline.html",
+    "./manifest.webmanifest",
+    "./icons/icon-192.png",
+    "./icons/icon-512.png"
 ];
 
 self.addEventListener("install", event => {
@@ -18,15 +23,26 @@ self.addEventListener("install", event => {
 });
 
 self.addEventListener("activate", event => {
-    console.log("Service Worker ativado");
+   event.waitUntil(
+    caches.keys().then(nomes => {
+        return Promisse.all(
+            nomes
+            .filter(nome => nome !== CACHE_NAME)
+            .map(nome => caches.delete(nome))
+        );
+    })
+   );
 });
 
 self.addEventListener("fetch", event => {
     event.respondWith(
         caches.match(event.request)
-            .then(resposta => {
-                return resposta || fetch(event.request);
-            })
-    )
+         .then (resposta => resposta || fetch(event.request))
+         .catch(() => {
+            if (event.request.mode === "navigate") {
+                return caches.match("./offline.html");
+            }
+         })
+    );
 });
 
